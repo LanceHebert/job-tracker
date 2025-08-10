@@ -108,8 +108,10 @@ export default function Clipper() {
       var salary=textAll('[data-testid*="salary"],[class*="salary"],[data-test*="salary"],[id*="salary"]');
       var remoteType=''; if(lower.indexOf('remote')>-1) remoteType='REMOTE'; else if(lower.indexOf('hybrid')>-1) remoteType='HYBRID'; else if(lower.indexOf('on-site')>-1||lower.indexOf('onsite')>-1||lower.indexOf('on site')>-1) remoteType='ONSITE';
       var desc=getDesc();
-      function add(k,v){return v?('&'+k+'='+encodeURIComponent(v)):''}
-      var dest='${target}?from=clipper'+add('title',title)+add('company',company)+add('location',loc)+add('salary',salary)+add('remoteType',remoteType)+add('url',url)+add('source',source)+add('description',desc);
+      // Prefer window.name transport to avoid URL size limits and CORS/popup constraints
+      var payload={title:title,company:company,location:loc,salary:salary,remoteType:remoteType,url:url,source:source,description:desc};
+      try{ if(w){ w.name='JOBDATA::'+encodeURIComponent(JSON.stringify(payload)); } }catch(_n){}
+      var dest='${target}?from=clipper';
       openDest(dest);
     }catch(e){alert('Clip failed: '+(e&&e.message?e.message:e))}})();`;
     return `javascript:${encodeURIComponent(code)}`;

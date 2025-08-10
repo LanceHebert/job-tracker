@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -27,6 +28,7 @@ export default function NewJobPage() {
     defaultValues: { status: "SAVED" },
   });
 
+  // Prefill from query params (fallback)
   if (typeof window !== 'undefined' && params.get('from') === 'clipper') {
     const fields: (keyof FormValues)[] = ['title','company','location','salary','remoteType','url','source','description'];
     for (const f of fields) {
@@ -34,6 +36,25 @@ export default function NewJobPage() {
       if (v) setValue(f, v);
     }
   }
+
+  // Prefill from window.name payload (robust new-tab transport)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const marker = 'JOBDATA::';
+    try {
+      if (window.name && window.name.startsWith(marker)) {
+        const encoded = window.name.slice(marker.length);
+        const raw = decodeURIComponent(encoded);
+        const data: Partial<FormValues> = JSON.parse(raw);
+        const fields: (keyof FormValues)[] = ['title','company','location','salary','remoteType','url','source','description'];
+        for (const f of fields) {
+          if (data[f]) setValue(f, data[f] as any);
+        }
+        // Clear name to avoid leaking payload when navigating
+        window.name = '';
+      }
+    } catch {}
+  }, [setValue]);
 
   const onSubmit = async (data: FormValues) => {
     await fetch("/api/jobs", {
