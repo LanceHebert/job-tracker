@@ -216,8 +216,70 @@ export default function Home() {
           {selectedJob.employmentType && <span className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[12px] text-slate-700">{selectedJob.employmentType}</span>}
           {selectedJob.salary && <span className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[12px] text-slate-700">{selectedJob.salary}</span>}
           {selectedJob.source && <span className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[12px] text-slate-700">{selectedJob.source.replace(/^www\./, "")}</span>}
+        </div>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
           {selectedJob.url && (
-            <a href={selectedJob.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[12px] text-slate-700 hover:bg-slate-50">Open ↗</a>
+            <div className="sm:col-span-2 flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">URL</span>
+              <a href={selectedJob.url} target="_blank" rel="noopener noreferrer" className="truncate text-sky-700 underline max-w-full">
+                {selectedJob.url}
+              </a>
+              <button
+                type="button"
+                className="text-xs px-2 py-1 border rounded-md text-slate-600 hover:bg-slate-50"
+                onClick={() => { if (typeof navigator !== 'undefined' && navigator.clipboard) navigator.clipboard.writeText(selectedJob.url || ''); }}
+              >
+                Copy
+              </button>
+            </div>
+          )}
+          {selectedJob.company && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">Company</span>
+              <span className="text-slate-800">{selectedJob.company}</span>
+            </div>
+          )}
+          {selectedJob.location && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">Location</span>
+              <span className="text-slate-800">{selectedJob.location}</span>
+            </div>
+          )}
+          {selectedJob.source && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">Source</span>
+              <span className="text-slate-800">{selectedJob.source}</span>
+            </div>
+          )}
+          {selectedJob.salary && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">Salary</span>
+              <span className="text-slate-800">{selectedJob.salary}</span>
+            </div>
+          )}
+          {selectedJob.employmentType && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">Type</span>
+              <span className="text-slate-800">{selectedJob.employmentType}</span>
+            </div>
+          )}
+          {selectedJob.remoteType && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">Remote</span>
+              <span className="text-slate-800">{selectedJob.remoteType}</span>
+            </div>
+          )}
+          {selectedJob.appliedAt && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">Applied</span>
+              <span className="text-slate-800">{new Date(selectedJob.appliedAt).toLocaleDateString()}</span>
+            </div>
+          )}
+          {selectedJob.status && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 w-20 shrink-0">Status</span>
+              <span className="text-slate-800">{selectedJob.status}</span>
+            </div>
           )}
         </div>
         {selectedJob.description && (
