@@ -44,14 +44,41 @@ export default function Clipper() {
           '[data-testid*="job-description"]', // Ashby
           '.content [itemprop="description"]', '[itemprop="description"]', '.content .section', '.description'
         ];
-        for(var k=0;k<picks.length;k++){var s=picks[k]; var h=html(s); if(h && h.length>60) return h}
+        for(var k=0;k<picks.length;k++){var s=picks[k]; var h=html(s); if(h && h.length>60){
+          // Trim boilerplate common on Indeed
+          h=h.replace(/\s+Find jobs, Company reviews, Salaries.*$/i,'').trim();
+          return h;
+        }}
         var ld=fromJSONLD(); if(ld && ld.length>60) return ld;
         var fallback=textAll('article, main, [role="main"]'); if(fallback.length>120) return fallback;
         return '';
       }
       var body=(document.body && (document.body.innerText||''))||''; var lower=body.toLowerCase();
       var url=location.href; var source=location.hostname;
-      var title=text('h1,[data-test-id="top-card-layout__title"],[data-testid*="job-title"],[class*="jobTitle"]')||document.title;
+      function cleanTitle(t){ if(!t) return ''; t=t.replace(/\s+/g,' ').trim();
+        // Drop obvious Indeed search headings
+        if(/what/i.test(t)&&/where/i.test(t)) return '';
+        if(/find jobs|company reviews|salaries/i.test(t)) return '';
+        return t.length>200? t.slice(0,200): t;
+      }
+      function pickTitle(){
+        var host=location.hostname;
+        var picks=[];
+        if(/indeed\./i.test(host)){
+          picks.push('h1.jobsearch-JobInfoHeader-title');
+          picks.push('#jobsearch-ViewjobPaneWrapper h1');
+          picks.push('[data-testid*="JobInfoHeader-title"]');
+          picks.push('[data-testid*="jobTitle"]');
+        }
+        // Generic fallbacks (LinkedIn, Ashby, etc.)
+        picks.push('h1');
+        picks.push('[data-test-id="top-card-layout__title"]');
+        picks.push('[data-testid*="job-title"]');
+        picks.push('[class*="jobTitle"]');
+        for(var i=0;i<picks.length;i++){ var t=cleanTitle(text(picks[i])); if(t) return t }
+        return cleanTitle(document.title||'');
+      }
+      var title=pickTitle();
       var company=text('[data-company],[data-test-company-name],[data-testid*="company"],a[href*="/company"],[class*="company"]')||'';
       var loc=text('[data-test-location],[data-testid*="location"],[class*="location"],[itemprop="jobLocation"]')||'';
       var salary=textAll('[data-testid*="salary"],[class*="salary"],[data-test*="salary"],[id*="salary"]');
