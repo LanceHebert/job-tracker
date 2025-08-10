@@ -11,8 +11,19 @@ export default function Clipper() {
       if(w){ try{ w.opener=null; }catch(_e){} }
       function openDest(d){
         if(w){ try{ w.location=d; return; }catch(_x){} }
-        var a=document.createElement('a'); a.href=d; a.target='_blank'; a.rel='noopener';
-        (document.body||document.documentElement).appendChild(a); a.click(); a.parentNode.removeChild(a);
+        // Try anchor click with target _blank
+        try{
+          var a=document.createElement('a'); a.href=d; a.target='_blank'; a.rel='noopener';
+          (document.body||document.documentElement).appendChild(a); a.click(); a.parentNode.removeChild(a);
+          return;
+        }catch(_y){}
+        // Try form submit with target _blank (often allowed when user-initiated)
+        try{
+          var f=document.createElement('form'); f.action=d; f.method='GET'; f.target='_blank';
+          (document.body||document.documentElement).appendChild(f); f.submit(); f.parentNode.removeChild(f);
+          return;
+        }catch(_z){}
+        // Last resort: same-tab
         try{ location.assign(d); }catch(__){}
       }
       function text(sel){var el=document.querySelector(sel);return el?String(el.textContent||'').trim():''}
