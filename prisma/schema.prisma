@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum JobStatus {
+  SAVED
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+}
+
+model Job {
+  id             String     @id @default(cuid())
+  title          String
+  company        String?
+  url            String?
+  source         String?
+  description    String?
+  location       String?
+  salary         String?
+  employmentType String?
+  remoteType     String?
+  notes          String?
+  appliedAt      DateTime?
+  status         JobStatus  @default(SAVED)
+  position       Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([status, position])
+}
