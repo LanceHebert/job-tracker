@@ -18,7 +18,7 @@ export default function Clipper() {
         if(w){ try{ w.location=d; return; }catch(_x){} }
         // Try anchor click with target _blank
         try{
-          var a=document.createElement('a'); a.href=d; a.target='_blank'; a.rel='noopener';
+          var a=document.createElement('a'); a.href=d; a.target='_blank'; a.rel='noopener noreferrer';
           (document.body||document.documentElement).appendChild(a); a.click(); a.parentNode.removeChild(a);
           return;
         }catch(_y){}
@@ -28,8 +28,8 @@ export default function Clipper() {
           (document.body||document.documentElement).appendChild(f); f.submit(); f.parentNode.removeChild(f);
           return;
         }catch(_z){}
-        // Last resort: same-tab
-        try{ location.assign(d); }catch(__){}
+        // Last resort: do not navigate same-tab; inform user to allow popups
+        alert('Please allow pop-ups for this site to open the Add Job form in a new tab.');
       }
       function text(sel){var el=document.querySelector(sel);return el?String(el.textContent||'').trim():''}
       function html(sel){var el=document.querySelector(sel);return el?String(el.innerText||el.textContent||'').trim():''}
@@ -55,26 +55,50 @@ export default function Clipper() {
       }
       var body=(document.body && (document.body.innerText||''))||''; var lower=body.toLowerCase();
       var url=location.href; var source=location.hostname;
-      function cleanTitle(t){ if(!t) return ''; t=t.replace(/\s+/g,' ').trim();
-        // Drop obvious Indeed search headings
-        if(/what/i.test(t)&&/where/i.test(t)) return '';
-        if(/find jobs|company reviews|salaries/i.test(t)) return '';
+      function cleanTitle(t){ if(!t) return ''; t=String(t).replace(/\s+/g,' ').trim();
+        if(/\bwhat\b/i.test(t)&&/\bwhere\b/i.test(t)) return '';
+        if(/find jobs|company reviews|salaries|post a job/i.test(t)) return '';
+        if(/^what\b/i.test(t) || /^where\b/i.test(t)) return '';
+        if(/indeed/i.test(t) && /job search/i.test(t)) return '';
         return t.length>200? t.slice(0,200): t;
+      }
+      function titleFromJSONLD(){
+        try{
+          var scripts=document.querySelectorAll('script[type="application/ld+json"]');
+          for(var i=0;i<scripts.length;i++){
+            try{
+              var d=JSON.parse(scripts[i].textContent||'{}');
+              var arr=Array.isArray(d)?d:[d];
+              for(var j=0;j<arr.length;j++){
+                var n=arr[j];
+                var t=n && (n.title || n.name || n.jobTitle || n.positionTitle);
+                if(n && (n['@type']==='JobPosting'||(Array.isArray(n['@type'])&&n['@type'].indexOf('JobPosting')>-1)) && t){
+                  t=String(t).replace(/<[^>]+>/g,'');
+                  t=t.replace(/\s+/g,' ').trim();
+                  t=cleanTitle(t); if(t) return t;
+                }
+              }
+            }catch(_){ }
+          }
+        }catch(_e){}
+        return '';
+      }
+      function titleFromMeta(){
+        var el=document.querySelector('meta[property="og:title"]')||document.querySelector('meta[name="twitter:title"]');
+        var c=el && (el.getAttribute('content')||'');
+        return cleanTitle(c||'');
       }
       function pickTitle(){
         var host=location.hostname;
-        var picks=[];
         if(/indeed\./i.test(host)){
-          picks.push('h1.jobsearch-JobInfoHeader-title');
-          picks.push('#jobsearch-ViewjobPaneWrapper h1');
-          picks.push('[data-testid*="JobInfoHeader-title"]');
-          picks.push('[data-testid*="jobTitle"]');
+          var root=document.querySelector('#jobsearch-ViewjobPaneWrapper, [data-testid*="ViewjobPane"], main');
+          var inRoot=function(sel){ if(!root) return ''; var el=root.querySelector(sel); return el?String(el.textContent||'').trim():'' };
+          var ipicks=['h1.jobsearch-JobInfoHeader-title','[data-testid*="JobInfoHeader-title"]','[data-testid*="jobTitle"]','h1'];
+          for(var z=0;z<ipicks.length;z++){ var t=cleanTitle(inRoot(ipicks[z])); if(t) return t }
         }
-        // Generic fallbacks (LinkedIn, Ashby, etc.)
-        picks.push('h1');
-        picks.push('[data-test-id="top-card-layout__title"]');
-        picks.push('[data-testid*="job-title"]');
-        picks.push('[class*="jobTitle"]');
+        var tld=titleFromJSONLD(); if(tld) return tld;
+        var tmeta=titleFromMeta(); if(tmeta) return tmeta;
+        var picks=['main h1, [role="main"] h1','[data-test-id="top-card-layout__title"]','[data-testid*="job-title"]','[class*="jobTitle"]'];
         for(var i=0;i<picks.length;i++){ var t=cleanTitle(text(picks[i])); if(t) return t }
         return cleanTitle(document.title||'');
       }
