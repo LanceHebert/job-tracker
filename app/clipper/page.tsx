@@ -6,10 +6,15 @@ export default function Clipper() {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const target = `${origin}/new`;
     const code = `(()=>{try{
+      function tryDirect(d){
+        try{ var ww=window.open(d,'_blank','noopener,noreferrer'); if(ww){ try{ww.opener=null;}catch(_){ } return true } }catch(_e){}
+        return false
+      }
       // Pre-open a blank tab synchronously to avoid popup blockers
       var w=window.open('', '_blank');
       if(w){ try{ w.opener=null; }catch(_e){} }
       function openDest(d){
+        if(tryDirect(d)) return;
         if(w){ try{ w.location=d; return; }catch(_x){} }
         // Try anchor click with target _blank
         try{
