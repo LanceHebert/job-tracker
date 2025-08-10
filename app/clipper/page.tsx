@@ -34,7 +34,7 @@ export default function Clipper() {
       var desc=getDesc();
       function add(k,v){return v?('&'+k+'='+encodeURIComponent(v)):''}
       var dest='${target}?from=clipper'+add('title',title)+add('company',company)+add('location',loc)+add('salary',salary)+add('remoteType',remoteType)+add('url',url)+add('source',source)+add('description',desc);
-      location.href=dest;
+      var w=window.open(dest,'_blank'); if(w){try{w.opener=null;}catch(_){}}
     }catch(e){alert('Clip failed: '+(e&&e.message?e.message:e))}})();`;
     return `javascript:${encodeURIComponent(code)}`;
   }, []);
