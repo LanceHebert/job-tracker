@@ -34,7 +34,15 @@ export default function Clipper() {
       var desc=getDesc();
       function add(k,v){return v?('&'+k+'='+encodeURIComponent(v)):''}
       var dest='${target}?from=clipper'+add('title',title)+add('company',company)+add('location',loc)+add('salary',salary)+add('remoteType',remoteType)+add('url',url)+add('source',source)+add('description',desc);
-      var w=window.open(dest,'_blank'); if(w){try{w.opener=null;}catch(_){}}
+      // Try guaranteed new-tab patterns with fallbacks
+      var w=window.open('', '_blank');
+      if(w){ try{ w.opener=null; w.location=dest; return; }catch(_e){} }
+      var a=document.createElement('a');
+      a.href=dest; a.target='_blank'; a.rel='noopener';
+      (document.body||document.documentElement).appendChild(a);
+      a.click(); a.parentNode.removeChild(a);
+      // Fallback to same-tab if everything blocked
+      try{ location.assign(dest); }catch(__){}
     }catch(e){alert('Clip failed: '+(e&&e.message?e.message:e))}})();`;
     return `javascript:${encodeURIComponent(code)}`;
   }, []);
