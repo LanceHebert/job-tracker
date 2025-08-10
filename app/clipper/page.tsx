@@ -6,6 +6,15 @@ export default function Clipper() {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const target = `${origin}/new`;
     const code = `(()=>{try{
+      // Pre-open a blank tab synchronously to avoid popup blockers
+      var w=window.open('', '_blank');
+      if(w){ try{ w.opener=null; }catch(_e){} }
+      function openDest(d){
+        if(w){ try{ w.location=d; return; }catch(_x){} }
+        var a=document.createElement('a'); a.href=d; a.target='_blank'; a.rel='noopener';
+        (document.body||document.documentElement).appendChild(a); a.click(); a.parentNode.removeChild(a);
+        try{ location.assign(d); }catch(__){}
+      }
       function text(sel){var el=document.querySelector(sel);return el?String(el.textContent||'').trim():''}
       function html(sel){var el=document.querySelector(sel);return el?String(el.innerText||el.textContent||'').trim():''}
       function textAll(sel){var list=document.querySelectorAll(sel), out=''; for(var i=0;i<list.length && i<4;i++){var t=String(list[i].innerText||list[i].textContent||'').trim(); if(t){out+= (out?' \u2022 ':'')+t}} return out}
@@ -34,15 +43,7 @@ export default function Clipper() {
       var desc=getDesc();
       function add(k,v){return v?('&'+k+'='+encodeURIComponent(v)):''}
       var dest='${target}?from=clipper'+add('title',title)+add('company',company)+add('location',loc)+add('salary',salary)+add('remoteType',remoteType)+add('url',url)+add('source',source)+add('description',desc);
-      // Try guaranteed new-tab patterns with fallbacks
-      var w=window.open('', '_blank');
-      if(w){ try{ w.opener=null; w.location=dest; return; }catch(_e){} }
-      var a=document.createElement('a');
-      a.href=dest; a.target='_blank'; a.rel='noopener';
-      (document.body||document.documentElement).appendChild(a);
-      a.click(); a.parentNode.removeChild(a);
-      // Fallback to same-tab if everything blocked
-      try{ location.assign(dest); }catch(__){}
+      openDest(dest);
     }catch(e){alert('Clip failed: '+(e&&e.message?e.message:e))}})();`;
     return `javascript:${encodeURIComponent(code)}`;
   }, []);
