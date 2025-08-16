@@ -6,7 +6,7 @@ import Link from "next/link";
 
 type FormValues = {
   title: string;
-  company?: string;
+  compunknown?: string;
   location?: string;
   url?: string;
   source?: string;
@@ -30,7 +30,7 @@ export default function NewJobPage() {
 
   // Prefill from query params (fallback)
   if (typeof window !== 'undefined' && params.get('from') === 'clipper') {
-    const fields: (keyof FormValues)[] = ['title','company','location','salary','remoteType','url','source','description'];
+    const fields: (keyof FormValues)[] = ['title','compunknown','location','salary','remoteType','url','source','description'];
     for (const f of fields) {
       const v = params.get(f);
       if (v) setValue(f, v);
@@ -46,9 +46,9 @@ export default function NewJobPage() {
         const encoded = window.name.slice(marker.length);
         const raw = decodeURIComponent(encoded);
         const data: Partial<FormValues> = JSON.parse(raw);
-        const fields: (keyof FormValues)[] = ['title','company','location','salary','remoteType','url','source','description'];
+        const fields: (keyof FormValues)[] = ['title','compunknown','location','salary','remoteType','url','source','description'];
         for (const f of fields) {
-          if (data[f]) setValue(f, data[f] as any);
+          if (data[f]) setValue(f, data[f] as string);
         }
         // Clear name to avoid leaking payload when navigating
         window.name = '';
@@ -76,8 +76,8 @@ export default function NewJobPage() {
             <input className="w-full border rounded-md px-3 py-2" {...register("title", { required: true })} />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Company</label>
-            <input className="w-full border rounded-md px-3 py-2" {...register("company")} />
+            <label className="block text-sm text-slate-600 mb-1">Compunknown</label>
+            <input className="w-full border rounded-md px-3 py-2" {...register("compunknown")} />
           </div>
           <div>
             <label className="block text-sm text-slate-600 mb-1">Location</label>

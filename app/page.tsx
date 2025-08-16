@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import clsx from "clsx";
 
+import StatsBox from "./components/StatsBox";
 type Job = {
   id: string;
   title: string;
@@ -303,6 +304,7 @@ export default function Home() {
     <>
       {Board}
       {modal}
+      <StatsBox columns={columns} />
     </>
   );
 }
