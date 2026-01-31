@@ -23,6 +23,9 @@ const mockJobsData = {
     { id: '8', title: 'Job 8', status: 'REJECTED' as const, position: 0 },
     { id: '9', title: 'Job 9', status: 'REJECTED' as const, position: 1 },
   ],
+  INTERVIEWED_BUT_REJECTED: [
+    { id: '10', title: 'Job 10', status: 'INTERVIEWED_BUT_REJECTED' as const, position: 0 },
+  ],
 }
 
 describe('StatsBox', () => {
@@ -39,7 +42,7 @@ describe('StatsBox', () => {
     // Find the total jobs specifically by looking for the text next to "Total Jobs:"
     expect(screen.getByText('Total Jobs:')).toBeInTheDocument()
     const totalJobsElement = screen.getByText('Total Jobs:').parentElement?.querySelector('.text-slate-800')
-    expect(totalJobsElement).toHaveTextContent('9')
+    expect(totalJobsElement).toHaveTextContent('10')
   })
 
   it('displays correct counts for each status', () => {
@@ -57,38 +60,47 @@ describe('StatsBox', () => {
     const offersSection = screen.getByText('Offers:').parentElement
     expect(offersSection?.querySelector('.text-emerald-600')).toHaveTextContent('1')
     
-    // Rejected: 2 jobs
+    // Rejected: 2 + 1 = 3 jobs (REJECTED + INTERVIEWED_BUT_REJECTED)
     const rejectedSection = screen.getByText('Rejected:').parentElement
-    expect(rejectedSection?.querySelector('.text-rose-600')).toHaveTextContent('2')
+    expect(rejectedSection?.querySelector('.text-rose-600')).toHaveTextContent('3')
   })
 
   it('calculates percentages correctly', () => {
     render(<StatsBox columns={mockJobsData} />)
     
-    // Applied: 3/9 = 33.3%
+    // Applied: 3/10 = 30.0%
     const appliedSection = screen.getByText('Applied:').parentElement
-    expect(appliedSection).toHaveTextContent('(33.3%)')
+    expect(appliedSection).toHaveTextContent('(30.0%)')
     
-    // Interviewing: 1/9 = 11.1%
+    // Interviewing: 1/10 = 10.0%
     const interviewingSection = screen.getByText('Interviewing:').parentElement
-    expect(interviewingSection).toHaveTextContent('(11.1%)')
+    expect(interviewingSection).toHaveTextContent('(10.0%)')
     
-    // Offers: 1/9 = 11.1%
+    // Offers: 1/10 = 10.0%
     const offersSection = screen.getByText('Offers:').parentElement
-    expect(offersSection).toHaveTextContent('(11.1%)')
+    expect(offersSection).toHaveTextContent('(10.0%)')
     
-    // Rejected: 2/9 = 22.2%
+    // Rejected: (2 + 1)/10 = 30.0% (REJECTED + INTERVIEWED_BUT_REJECTED)
     const rejectedSection = screen.getByText('Rejected:').parentElement
-    expect(rejectedSection).toHaveTextContent('(22.2%)')
+    expect(rejectedSection).toHaveTextContent('(30.0%)')
+  })
+
+  it('calculates interview rate correctly', () => {
+    render(<StatsBox columns={mockJobsData} />)
+    
+    // Interview rate: (1 interviewing + 1 interviewed_but_rejected) / (3 applied + 1 interviewing + 1 offer + 2 rejected + 1 interviewed_but_rejected) = 2/8 = 25.0%
+    const interviewRateSection = screen.getByText('Interview Rate:').parentElement
+    expect(interviewRateSection?.querySelector('.text-slate-800')).toHaveTextContent('25.0%')
+    expect(screen.getByText(/Interviews \/ Total Applied/)).toBeInTheDocument()
   })
 
   it('calculates success rate correctly', () => {
     render(<StatsBox columns={mockJobsData} />)
     
-    // Success rate: 1 offer / 3 applied = 33.3%
+    // Success rate: 1 offer / 8 total applied = 12.5%
     const successRateSection = screen.getByText('Success Rate:').parentElement
-    expect(successRateSection?.querySelector('.text-slate-800')).toHaveTextContent('33.3%')
-    expect(screen.getByText('Offers / Applied')).toBeInTheDocument()
+    expect(successRateSection?.querySelector('.text-slate-800')).toHaveTextContent('12.5%')
+    expect(screen.getByText('Offers / Total Applied')).toBeInTheDocument()
   })
 
   it('handles empty data gracefully', () => {

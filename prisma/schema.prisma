@@ -17,6 +17,7 @@ enum JobStatus {
   INTERVIEWING
   OFFER
   REJECTED
+  INTERVIEWED_BUT_REJECTED
 }
 
 model Job {

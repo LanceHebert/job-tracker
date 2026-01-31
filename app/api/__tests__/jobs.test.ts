@@ -33,7 +33,7 @@ describe('/api/jobs API', () => {
     expect(mockJob.position).toBeDefined()
     
     // Validate status values
-    const validStatuses = ['SAVED', 'APPLIED', 'INTERVIEWING', 'OFFER', 'REJECTED']
+    const validStatuses = ['SAVED', 'APPLIED', 'INTERVIEWING', 'OFFER', 'REJECTED', 'INTERVIEWED_BUT_REJECTED']
     expect(validStatuses).toContain(mockJob.status)
     
     // Validate data types
@@ -43,13 +43,13 @@ describe('/api/jobs API', () => {
   })
 
   it('should validate job status enum values', () => {
-    const validStatuses = ['SAVED', 'APPLIED', 'INTERVIEWING', 'OFFER', 'REJECTED']
+    const validStatuses = ['SAVED', 'APPLIED', 'INTERVIEWING', 'OFFER', 'REJECTED', 'INTERVIEWED_BUT_REJECTED']
     
     validStatuses.forEach(status => {
       expect(validStatuses).toContain(status)
     })
     
-    expect(validStatuses).toHaveLength(5)
+    expect(validStatuses).toHaveLength(6)
   })
 
   it('should handle API response structure', () => {

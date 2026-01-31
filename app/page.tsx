@@ -18,11 +18,11 @@ type Job = {
   description?: string | null;
   notes?: string | null;
   appliedAt?: string | null;
-  status: "SAVED" | "APPLIED" | "INTERVIEWING" | "OFFER" | "REJECTED";
+  status: "SAVED" | "APPLIED" | "INTERVIEWING" | "OFFER" | "REJECTED" | "INTERVIEWED_BUT_REJECTED";
   position: number;
 };
 
-const STATUSES: Job["status"][] = ["SAVED", "APPLIED", "INTERVIEWING", "OFFER", "REJECTED"];
+const STATUSES: Job["status"][] = ["SAVED", "APPLIED", "INTERVIEWING", "OFFER", "REJECTED", "INTERVIEWED_BUT_REJECTED"];
 
 export default function Home() {
   const [columns, setColumns] = useState<Record<string, Job[]>>({});
@@ -90,7 +90,7 @@ export default function Home() {
   const Board = useMemo(() => (
     <div className="min-h-screen p-6 sm:p-10">
       <DragDropContext onDragStart={() => setDragActive(true)} onDragEnd={onDragEnd}>
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 items-start">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 items-start">
           {STATUSES.map((status) => (
             <Droppable key={status} droppableId={status}>
               {(provided) => (
@@ -109,9 +109,10 @@ export default function Home() {
                         status === "APPLIED" && "bg-sky-500",
                         status === "INTERVIEWING" && "bg-amber-500",
                         status === "OFFER" && "bg-emerald-500",
-                        status === "REJECTED" && "bg-rose-500"
+                        status === "REJECTED" && "bg-rose-500",
+                        status === "INTERVIEWED_BUT_REJECTED" && "bg-orange-500"
                       )} />
-                      {status}
+                      {status === "INTERVIEWED_BUT_REJECTED" ? "Interviewed But Rejected" : status}
                     </h2>
                     <span className="text-xs text-slate-500">{columns[status]?.length ?? 0}</span>
                   </div>

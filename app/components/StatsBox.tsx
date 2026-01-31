@@ -15,7 +15,7 @@ type Job = {
   description?: string | null;
   notes?: string | null;
   appliedAt?: string | null;
-  status: "SAVED" | "APPLIED" | "INTERVIEWING" | "OFFER" | "REJECTED";
+  status: "SAVED" | "APPLIED" | "INTERVIEWING" | "OFFER" | "REJECTED" | "INTERVIEWED_BUT_REJECTED";
   position: number;
 };
 
@@ -30,12 +30,15 @@ export default function StatsBox({ columns }: StatsBoxProps) {
         totalJobs: 0,
         appliedJobs: 0,
         rejectedJobs: 0,
+        interviewedButRejectedJobs: 0,
         interviewingJobs: 0,
         offerJobs: 0,
         appliedPercentage: "0",
         rejectedPercentage: "0",
         interviewPercentage: "0",
         offerPercentage: "0",
+        interviewRate: "0",
+        totalAppliedJobs: 0,
       };
     }
     
@@ -44,25 +47,41 @@ export default function StatsBox({ columns }: StatsBoxProps) {
     
     const appliedJobs = columns["APPLIED"]?.length || 0;
     const rejectedJobs = columns["REJECTED"]?.length || 0;
+    const interviewedButRejectedJobs = columns["INTERVIEWED_BUT_REJECTED"]?.length || 0;
     const interviewingJobs = columns["INTERVIEWING"]?.length || 0;
     const offerJobs = columns["OFFER"]?.length || 0;
     
+    // Total jobs that were applied to (excluding SAVED)
+    const totalAppliedJobs = appliedJobs + interviewingJobs + offerJobs + rejectedJobs + interviewedButRejectedJobs;
+    
+    // Combined rejected count (REJECTED + INTERVIEWED_BUT_REJECTED)
+    const totalRejectedJobs = rejectedJobs + interviewedButRejectedJobs;
+    
+    // Jobs that reached interview stage (INTERVIEWING + INTERVIEWED_BUT_REJECTED)
+    const interviewedJobs = interviewingJobs + interviewedButRejectedJobs;
+    
     // Calculate percentages
     const appliedPercentage = totalJobs > 0 ? ((appliedJobs / totalJobs) * 100).toFixed(1) : "0";
-    const rejectedPercentage = totalJobs > 0 ? ((rejectedJobs / totalJobs) * 100).toFixed(1) : "0";
+    const rejectedPercentage = totalJobs > 0 ? ((totalRejectedJobs / totalJobs) * 100).toFixed(1) : "0";
     const interviewPercentage = totalJobs > 0 ? ((interviewingJobs / totalJobs) * 100).toFixed(1) : "0";
     const offerPercentage = totalJobs > 0 ? ((offerJobs / totalJobs) * 100).toFixed(1) : "0";
+    
+    // Interview rate: (INTERVIEWING + INTERVIEWED_BUT_REJECTED) / total applied jobs
+    const interviewRate = totalAppliedJobs > 0 ? ((interviewedJobs / totalAppliedJobs) * 100).toFixed(1) : "0";
     
     return {
       totalJobs,
       appliedJobs,
-      rejectedJobs,
+      rejectedJobs: totalRejectedJobs,
+      interviewedButRejectedJobs,
       interviewingJobs,
       offerJobs,
       appliedPercentage,
       rejectedPercentage,
       interviewPercentage,
       offerPercentage,
+      interviewRate,
+      totalAppliedJobs,
     };
   }, [columns]);
 
@@ -115,13 +134,22 @@ export default function StatsBox({ columns }: StatsBoxProps) {
       {stats.totalJobs > 0 && (
         <div className="mt-3 pt-3 border-t border-slate-200">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-slate-500">Success Rate:</span>
+            <span className="text-xs text-slate-500">Interview Rate:</span>
             <span className="text-xs font-medium text-slate-800">
-              {stats.appliedJobs > 0 ? ((stats.offerJobs / stats.appliedJobs) * 100).toFixed(1) : "0"}%
+              {stats.interviewRate}%
             </span>
           </div>
           <div className="text-xs text-slate-500 mt-1">
-            Offers / Applied
+            Interviews / Total Applied ({stats.totalAppliedJobs})
+          </div>
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-xs text-slate-500">Success Rate:</span>
+            <span className="text-xs font-medium text-slate-800">
+              {stats.totalAppliedJobs > 0 ? ((stats.offerJobs / stats.totalAppliedJobs) * 100).toFixed(1) : "0"}%
+            </span>
+          </div>
+          <div className="text-xs text-slate-500 mt-1">
+            Offers / Total Applied
           </div>
         </div>
       )}
